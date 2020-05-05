@@ -1,14 +1,13 @@
 package application;
 
-import Bordergame.Positon;
+import Bordergame.Board;
+
 
 public class Program {
 
 	public static void main(String[] args) {
 
-		Positon pos = new Positon(3, 5);
-		System.out.println(pos);
-		
+		Board board = new Board(8, 8);
 		
 	}
 
