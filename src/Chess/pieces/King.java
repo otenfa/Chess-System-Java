@@ -2,13 +2,17 @@ package Chess.pieces;
 
 import Bordergame.Board;
 import Bordergame.Positon;
+import Chess.ChessMatch;
 import Chess.ChessPiece;
 import Chess.Color;
 
 public class King extends ChessPiece {
 
-	public King(Board board, Color color) {
+	private ChessMatch chessMatch;
+
+	public King(Board board, Color color, ChessMatch chessMatch) {
 		super(board, color);
+		this.chessMatch = chessMatch;
 	}
 
 	@Override
@@ -19,6 +23,11 @@ public class King extends ChessPiece {
 	private boolean canMove(Positon position) {
 		ChessPiece p = (ChessPiece) getBoard().piece(position);
 		return p == null || p.getColor() != getColor();
+	}
+
+	private boolean testRookCastling(Positon position) {
+		ChessPiece p = (ChessPiece) getBoard().piece(position);
+		return p != null && p instanceof Rook && p.getColor() == getColor() && p.getMoveCount() == 0;
 	}
 
 	@Override
@@ -44,7 +53,7 @@ public class King extends ChessPiece {
 		if (getBoard().positionExists(p) && canMove(p)) {
 			mat[p.getRow()][p.getColumn()] = true;
 		}
-		
+
 		// right
 		p.setValues(position.getRow(), position.getColumn() + 1);
 		if (getBoard().positionExists(p) && canMove(p)) {
@@ -68,11 +77,34 @@ public class King extends ChessPiece {
 		if (getBoard().positionExists(p) && canMove(p)) {
 			mat[p.getRow()][p.getColumn()] = true;
 		}
-		
+
 		// sw
 		p.setValues(position.getRow() + 1, position.getColumn() - 1);
 		if (getBoard().positionExists(p) && canMove(p)) {
 			mat[p.getRow()][p.getColumn()] = true;
+		}
+
+		// #special move castling
+		if (getMoveCount() == 0 && !chessMatch.getCheck()) {
+			// #special move castling kingside Rook
+			Positon posT1 = new Positon(position.getRow(), position.getColumn() + 3);
+			if (testRookCastling(posT1)) {
+				Positon p1 = new Positon(position.getRow(), position.getColumn() + 1);
+				Positon p2 = new Positon(position.getRow(), position.getColumn() + 2);
+				if (getBoard().piece(p1) == null && getBoard().piece(p2) == null) {
+					mat[position.getRow()][position.getColumn() + 2] = true;
+				}
+			}
+			// #special move castling Queenside Rook
+			Positon posT2 = new Positon(position.getRow(), position.getColumn() - 4);
+			if (testRookCastling(posT2)) {
+				Positon p1 = new Positon(position.getRow(), position.getColumn() - 1);
+				Positon p2 = new Positon(position.getRow(), position.getColumn() - 2);
+				Positon p3 = new Positon(position.getRow(), position.getColumn() - 3);
+				if (getBoard().piece(p1) == null && getBoard().piece(p2) == null && getBoard().piece(p3) == null) {
+					mat[position.getRow()][position.getColumn() - 2] = true;
+				}
+			}
 		}
 
 		return mat;
